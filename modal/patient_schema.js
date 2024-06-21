@@ -12,4 +12,4 @@ const Patient_schema= mongoose.Schema({
     remark:String
 },{timestamps:true})
 
-module.exports= mongoose.model("patiny",Patient_schema)
+module.exports= mongoose.model("patinies",Patient_schema)

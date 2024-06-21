@@ -1,12 +1,33 @@
 const patient_schema = require("./modal/patient_schema")
 const admin_schema= require('./user_schema')
 var bcrypt = require('bcryptjs');
+// require("bcryptjs")
 
 const getAllPatient= async(req,res)=>{ 
     try {
         let find;
         const searchValue= req?.query?.searchdata
+        const filteremrgency= req?.query?.emergencyFilter
+        const fiterstatus= req?.query?.statusFilter
         console.log("search====>",searchValue);
+        console.log("filteremrgency====>",filteremrgency);
+        
+        // find= await patient_schema.find({})
+
+        const countemergency = await patient_schema.countDocuments({emergency: true});
+
+        if (filteremrgency != "all") {
+            find= await patient_schema.find({emergency:filteremrgency }) 
+            console.log("find EMER====>>",find?.length);
+            return  res.status(200).send({status:true,message:"Emergency patient", data:find, countemergency})   
+           } 
+
+           if (fiterstatus != "all") {
+            find= await patient_schema.find({remark:fiterstatus }) 
+            console.log("find Status====>>",find?.length);
+            return  res.status(200).send({status:true,message:"Status patient", data:find, countemergency})   
+           } 
+
         if (searchValue) {
             const searchRegex= new RegExp( searchValue,'i')
             find= await patient_schema.find({name:{$regex:searchRegex}} )
@@ -14,16 +35,23 @@ const getAllPatient= async(req,res)=>{
             //email 2nd condition//
             if(!find?.length){
             find= await patient_schema.find({email:{$regex:searchRegex}} )
-
+            
             //phone Number 3rd condition
             if (!find?.length) {
             find= await patient_schema.find({phoneNo:searchValue})
             }
-            }
-        } else {
+            
+           
+        }
+        
+     } 
+     else {
             find= await patient_schema.find({})            
         }
-        const countemergency = await patient_schema.countDocuments({emergency: true});
+
+        
+       
+        // console.log("find===>",find);
         res.status(200).send({status:true,message:"all patient", data:find, countemergency})   
     } catch (error) {
         res.status(400).send("something went wrong !!")
